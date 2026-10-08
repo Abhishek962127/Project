@@ -1,0 +1,49 @@
+### Health
+GET http://localhost:7000/api/health
+
+### Signup
+POST http://localhost:7000/api/auth/signup
+Content-Type: application/json
+
+{
+  "name": "Abhishek",
+  "email": "abhishek@example.com",
+  "password": "password123"
+}
+
+### Login
+POST http://localhost:7000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "abhishek@example.com",
+  "password": "password123"
+}
+
+### Events
+GET http://localhost:7000/api/events
+
+### Search
+GET http://localhost:7000/api/events?search=hackathon&page=1&limit=10
+
+### Create Event
+POST http://localhost:7000/api/events
+Authorization: Bearer YOUR_TOKEN
+Content-Type: application/json
+
+{
+  "title": "CodeChef Hackathon",
+  "description": "A development and competitive programming event.",
+  "location": "ABES Engineering College",
+  "date": "2026-12-20T10:00:00.000Z",
+  "capacity": 100,
+  "category": "Technology"
+}
+
+### Register
+POST http://localhost:7000/api/registrations/events/EVENT_ID
+Authorization: Bearer YOUR_TOKEN
+
+### My Registrations
+GET http://localhost:7000/api/registrations/me
+Authorization: Bearer YOUR_TOKEN
