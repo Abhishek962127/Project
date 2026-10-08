@@ -5,6 +5,7 @@ A RESTful backend system for creating and managing events and handling user regi
 ## Features
 
 ### Required
+
 - Create, update and delete events
 - View all events
 - View event details
@@ -17,6 +18,7 @@ A RESTful backend system for creating and managing events and handling user regi
 - MongoDB persistence
 
 ### Bonus
+
 - JWT authentication
 - Role-based authorization (`user`, `organizer`, `admin`)
 - Search events
@@ -39,46 +41,17 @@ A RESTful backend system for creating and managing events and handling user regi
 - CORS
 - Morgan
 
-## Project Structure
-
-```text
-event-management-api/
-├── src/
-│   ├── config/
-│   │   └── db.js
-│   ├── middleware/
-│   │   ├── auth.middleware.js
-│   │   └── error.middleware.js
-│   ├── models/
-│   │   ├── Event.js
-│   │   ├── Registration.js
-│   │   └── User.js
-│   ├── routes/
-│   │   ├── auth.routes.js
-│   │   ├── event.routes.js
-│   │   └── registration.routes.js
-│   ├── utils/
-│   │   └── token.js
-│   ├── app.js
-│   └── server.js
-├── .env.example
-├── .gitignore
-├── package.json
-└── README.md
-```
-
 ## Requirements
 
-Install:
 - Node.js 18+
-- MongoDB Community Server locally, or use MongoDB Atlas
+- MongoDB Community Server locally, or MongoDB Atlas
 
 ## Installation
 
 ### 1. Clone the repository
 
 ```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
+git clone YOUR_GITHUB_REPOSITORY_URL
 cd event-management-api
 ```
 
@@ -90,19 +63,18 @@ npm install
 
 ### 3. Create `.env`
 
-Copy `.env.example` to `.env`.
-
-Example:
+Create a file named `.env` in the project root.
 
 ```env
 PORT=7000
 MONGO_URI=mongodb://127.0.0.1:27017/event_management
-JWT_SECRET=replace_with_a_long_random_secret
+JWT_SECRET=your_secret_key
 JWT_EXPIRES_IN=7d
 CORS_ORIGIN=*
+ADMIN_NAME=Admin
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=Admin@123456
 ```
-
-If using MongoDB Atlas, replace `MONGO_URI` with your Atlas connection string.
 
 ### 4. Start the server
 
@@ -118,27 +90,19 @@ Production:
 npm start
 ```
 
-### Create a test admin
-
-Put `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` in `.env`, then run:
+### 5. Create an admin
 
 ```bash
 npm run create-admin
 ```
 
-This creates or updates that account as an `admin`. The command is intended for local/testing setup.
+The API will run at:
 
-The API runs at:
-
-```text
-http://localhost:7000
-```
+`http://localhost:7000`
 
 Health check:
 
-```text
-GET http://localhost:7000/api/health
-```
+`http://localhost:7000/api/health`
 
 ## API Documentation
 
@@ -151,7 +115,7 @@ POST /api/auth/signup
 Content-Type: application/json
 ```
 
-Body:
+Request body:
 
 ```json
 {
@@ -168,7 +132,7 @@ POST /api/auth/login
 Content-Type: application/json
 ```
 
-Body:
+Request body:
 
 ```json
 {
@@ -179,53 +143,53 @@ Body:
 
 The response contains a JWT token.
 
-For protected endpoints:
+For protected routes:
 
 ```http
 Authorization: Bearer YOUR_TOKEN
 ```
 
-### Events
+## Events
 
-#### Get events
+### Get all events
 
 ```http
 GET /api/events
 ```
 
-Search:
+### Search events
 
 ```http
 GET /api/events?search=hackathon
 ```
 
-Category:
+### Filter by category
 
 ```http
 GET /api/events?category=Technology
 ```
 
-Upcoming:
+### Get upcoming events
 
 ```http
 GET /api/events?upcoming=true
 ```
 
-Pagination:
+### Pagination
 
 ```http
 GET /api/events?page=1&limit=10
 ```
 
-#### Get event details
+### Get event details
 
 ```http
 GET /api/events/:id
 ```
 
-#### Create event
+### Create event
 
-Requires organizer/admin token.
+Organizer/Admin only:
 
 ```http
 POST /api/events
@@ -233,7 +197,7 @@ Authorization: Bearer YOUR_TOKEN
 Content-Type: application/json
 ```
 
-Body:
+Request body:
 
 ```json
 {
@@ -242,30 +206,27 @@ Body:
   "location": "ABES Engineering College",
   "date": "2026-12-20T10:00:00.000Z",
   "capacity": 100,
-  "category": "Technology",
-  "imageUrl": "https://example.com/event.jpg"
+  "category": "Technology"
 }
 ```
 
-#### Update event
+### Update event
 
 ```http
 PUT /api/events/:id
 Authorization: Bearer YOUR_TOKEN
 ```
 
-#### Delete event
+### Delete event
 
 ```http
 DELETE /api/events/:id
 Authorization: Bearer YOUR_TOKEN
 ```
 
-### Registrations
+## Registrations
 
-#### Register for an event
-
-Requires login.
+### Register for an event
 
 ```http
 POST /api/registrations/events/:eventId
@@ -275,28 +236,29 @@ Authorization: Bearer YOUR_TOKEN
 No request body is required.
 
 The API checks:
+
 1. Event exists
 2. Event has not started
 3. Event is not full
 4. User has not already registered
 
-#### Get my registrations
+### Get my registrations
 
 ```http
 GET /api/registrations/me
 Authorization: Bearer YOUR_TOKEN
 ```
 
-#### Cancel registration
+### Cancel registration
 
 ```http
 DELETE /api/registrations/:registrationId
 Authorization: Bearer YOUR_TOKEN
 ```
 
-#### View registrations for an event
+### View event registrations
 
-Organizer/admin only:
+Organizer/Admin only:
 
 ```http
 GET /api/registrations/event/:eventId
@@ -306,47 +268,33 @@ Authorization: Bearer YOUR_TOKEN
 ## Roles
 
 ### User
+
 - View events
 - Register for events
 - View own registrations
 - Cancel own registrations
 
 ### Organizer
-- Everything a user can do
+
 - Create events
 - Update own events
 - Delete own events
 - View registrations for own events
 
 ### Admin
-- Full event and registration management
 
-For testing, a newly created account starts as `user`. To create an organizer/admin, change the `role` value directly in MongoDB for a test account.
-
-## Example Success Response
-
-```json
-{
-  "success": true,
-  "message": "Registration successful",
-  "data": {
-    "_id": "registration-id",
-    "user": "user-id",
-    "event": "event-id"
-  }
-}
-```
+- Full event management
+- View all registrations
+- Manage events
 
 ## Error Handling
-
-The API uses appropriate status codes:
 
 | Code | Meaning |
 |---|---|
 | 200 | Successful request |
 | 201 | Resource created |
 | 400 | Invalid request |
-| 401 | Authentication required/invalid |
+| 401 | Authentication required |
 | 403 | Insufficient permission |
 | 404 | Resource not found |
 | 409 | Duplicate/conflicting request |
@@ -354,26 +302,28 @@ The API uses appropriate status codes:
 
 ## Data Source
 
-No external API is required. All application data is stored in MongoDB.
+No external API is required.
 
-## How Duplicate Registration Is Prevented
+All application data is stored in MongoDB.
 
-Two protections are used:
+## Duplicate Registration Prevention
 
-1. The API checks whether a registration already exists before creating one.
-2. MongoDB has a unique compound index:
+The system uses a unique MongoDB compound index:
 
 ```text
 { user: 1, event: 1 }
 ```
 
-This means the same user cannot have two registration records for the same event.
+This prevents the same user from registering for the same event more than once.
 
 ## Capacity Management
 
-Each event stores:
-- `capacity`
-- `registeredCount`
+Each event contains:
+
+```text
+capacity
+registeredCount
+```
 
 When registration succeeds:
 
@@ -393,97 +343,80 @@ Registration is rejected when:
 registeredCount >= capacity
 ```
 
-Capacity cannot be changed to a value lower than the current number of registrations.
-
 ## Challenges and Solutions
 
-### Challenge 1: Preventing duplicate registrations
+### Challenge 1: Duplicate registrations
 
-A normal application-level check can still have race conditions when multiple requests arrive at the same time.
+**Problem:** A user should not register for the same event twice.
 
-Solution:
-- Check for an existing registration.
-- Add a MongoDB unique compound index on `user + event`.
-- Use a database transaction for registration and capacity updates.
+**Solution:** The API checks existing registrations and MongoDB also uses a unique compound index.
 
-### Challenge 2: Maintaining event capacity
+### Challenge 2: Event capacity
 
-The event's registration count must remain synchronized with registration records.
+**Problem:** More users should not register after the event becomes full.
 
-Solution:
-- Use an atomic MongoDB update that increments `registeredCount` only when a seat is available.
-- Use a unique compound index on user + event.
-- If registration creation fails, the capacity increment is rolled back.
-- Cancellation decrements the count.
+**Solution:** The API uses an atomic MongoDB update to increase `registeredCount` only when a seat is available.
 
-### Challenge 3: Securing organizer operations
+### Challenge 3: Authorization
 
-Normal users should not create or delete events.
+**Problem:** Normal users should not create or delete events.
 
-Solution:
-- JWT authentication identifies the user.
-- Role-based middleware checks whether the user is a `user`, `organizer`, or `admin`.
-- Organizers can modify only their own events.
+**Solution:** JWT authentication and role-based authorization are used.
 
 ### Challenge 4: Invalid input
 
-Bad dates, negative capacity, invalid email addresses and malformed requests can create unreliable data.
+**Problem:** Invalid emails, dates and capacities could create bad data.
 
-Solution:
-- `express-validator` validates incoming request data.
-- Mongoose provides an additional database-level validation layer.
-- Errors return meaningful HTTP status codes.
+**Solution:** `express-validator` and Mongoose validation are used.
 
 ## Testing
 
 You can test the API using:
+
 - Postman
 - Thunder Client
 - Insomnia
 - VS Code REST Client
-- Your own frontend/API tester
 
-Recommended testing order:
+Recommended flow:
 
 1. Signup
 2. Login
-3. Create an organizer account for testing
+3. Create admin
 4. Create an event
 5. Get events
-6. Register a normal user
-7. Try registering the same user again
-8. Fill the event capacity
-9. Try registering after it becomes full
-10. Cancel a registration
-11. Verify available capacity increases
-12. Test unauthorized create/update/delete requests
+6. Register a user
+7. Try duplicate registration
+8. Test event capacity
+9. Cancel registration
+10. Verify capacity
+11. Test unauthorized requests
 
 ## Deployment
 
-The API can be deployed to a Node.js-compatible hosting platform such as Render, Railway, or another cloud provider.
-
 For production:
+
 - Use MongoDB Atlas
 - Set environment variables on the hosting platform
 - Never commit `.env`
-- Use a strong random `JWT_SECRET`
-- Set `CORS_ORIGIN` to the frontend domain
+- Use a strong JWT secret
+- Configure `CORS_ORIGIN`
+
+Possible hosting platforms:
+
+- Render
+- Railway
+- Other Node.js hosting services
 
 ## Future Improvements
 
-- Email confirmation after registration
+- Email confirmation
 - QR-code event tickets
 - Event reminders
 - Admin dashboard
-- Registration export to CSV
-- Event categories and tags
+- CSV registration export
 - Rate limiting
 - Swagger/OpenAPI documentation
 - Refresh tokens
-- Event waitlist when capacity is reached
+- Event waitlist
 
-## License
-
-MIT
-#   P r o j e c t  
- 
